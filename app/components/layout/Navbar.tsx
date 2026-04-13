@@ -1,4 +1,5 @@
-import { useState } from "react"; 
+import { useEffect, useState } from "react"; 
+import { createPortal } from "react-dom";
 import { Bell, Code, Zap, Map, Database, Fish } from "lucide-react";
 import { EmergencyModal } from "../modal/EmergencyModal"; 
 import { DeveloperModal } from "../modal/DeveloperModal";
@@ -25,10 +26,15 @@ export const Navbar = ({ activeMenu, setActiveMenu }: { activeMenu: string, setA
     { name: "Arsip", id: "arsip", icon: Database }
   ];
 
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+if (!mounted) return null;
+
+return createPortal(
     <>
       {/* --- TOP NAVBAR --- */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-3 md:px-8 py-4 bg-white/90 backdrop-blur-xl border-b border-slate-200">
+      <nav className="fixed top-0 left-0 right-0 z-[99999] flex items-center justify-between px-3 md:px-8 py-4 bg-white/90 backdrop-blur-xl border-b border-slate-200">
         
         {/* Logo Section */}
         <div className="flex items-center gap-2 md:gap-3">
@@ -106,10 +112,11 @@ export const Navbar = ({ activeMenu, setActiveMenu }: { activeMenu: string, setA
             );
           })}
         </div>
-      </div>
+      </div>,
 
       <DeveloperModal isOpen={isDevOpen} onClose={() => setIsDevOpen(false)} />
       <EmergencyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </>
+    </>,
+    document.body
   );
 };
