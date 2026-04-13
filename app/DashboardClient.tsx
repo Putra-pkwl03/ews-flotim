@@ -38,24 +38,23 @@ return (
         <Navbar activeMenu={activeMenu} setActiveMenu={handleMenuClick} />
       </div>
 
-      {/* KUNCI PERBAIKAN: 
-          1. Tambahkan 'relative' agar exit animation tidak menggeser layout.
-          2. Gunakan 'min-h-[calc(100vh-64px)]' agar tingginya tidak drop nol saat transisi.
+      {/* UBAH pt-16 (64px) menyesuaikan tinggi Navbar. 
+          Gunakan flex-1 agar div ini mengambil sisa ruang yang tersedia.
       */}
-      <div className="pt-16 flex-grow flex flex-col relative min-h-[100vh]">
+      <div className="pt-16 flex-1 flex flex-col relative overflow-hidden">
         <AnimatePresence mode="wait">
           
           {activeMenu === 'gempa' && (
             <motion.div 
               key="wrapper-monitoring"
-              // Gunakan Fade + Scale halus (0.98) agar transisi terasa lebih "dalam"
               initial={{ opacity: 0, scale: 0.99 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.01 }} 
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="w-full flex-grow flex flex-col"
             >
-              <div className="relative w-full h-[80vh] overflow-hidden bg-slate-900 flex-shrink-0">
+              {/* Di menu Gempa, kita buat h-[70vh] saja agar kartu di bawahnya lebih cepat terlihat di mobile */}
+              <div className="relative w-full h-[60vh] md:h-[80vh] overflow-hidden bg-slate-900 flex-shrink-0">
                 <MapWrapper 
                   lat={coords.lat} 
                   lon={coords.lon} 
@@ -65,25 +64,21 @@ return (
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-900/40 via-transparent to-slate-50 z-10 pointer-events-none" />
               </div>
 
-              <div className="max-w-7xl mx-auto px-8 relative z-20 -mt-64 w-full">
+              <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-20 -mt-32 md:-mt-64 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[
+                   {/* Card mapping tetap sama */}
+                   {[
                     <EarthquakeCard key="eq" data={gempa} />,
                     <WeatherCard key="weather" data={cuaca} />,
                     <AIChatCard key="ai" dataKonteks={{ gempa, titikDarat: dataDarat, titikLaut: dataLaut }} />
                   ].map((card, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 + (i * 0.1), duration: 0.4 }}
-                    >
+                    <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + (i * 0.1), duration: 0.4 }}>
                       {card}
                     </motion.div>
                   ))}
                 </div>
 
-                <div id="arsip-section" className="pb-12 mt-12">
+                <div id="arsip-section" className="pb-24 md:pb-12 mt-12">
                   <SeismicTable history={history} />
                 </div>
               </div>
@@ -93,12 +88,15 @@ return (
           {activeMenu === 'ikan' && (
             <motion.div 
               key="wrapper-ikan"
-              // Hindari penggunaan 'x' yang terlalu jauh, cukup opacity dan scale
               initial={{ opacity: 0, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="relative w-full h-[calc(100vh-64px)] bg-slate-950 overflow-hidden" 
+              /* SOLUSI UTAMA: 
+                 1. Gunakan h-full (karena parentnya flex-1) 
+                 2. Tambahkan pb-16 (atau sesuai tinggi navbar bawahmu) agar konten tidak 'tenggelam'
+              */
+              className="relative w-full h-full flex-grow bg-slate-950 overflow-hidden pb-16 md:pb-0" 
             >
               <FishingWrapper points={dataLaut} />
               <div className="absolute inset-0 bg-gradient-to-b from-slate-950/20 via-transparent to-slate-50 z-10 pointer-events-none" />
