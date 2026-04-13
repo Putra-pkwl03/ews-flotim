@@ -1,18 +1,30 @@
 import { Wind, Thermometer, Compass, CheckCircle2, Info } from "lucide-react";
+import { useState } from "react";
 
 export const WeatherCard = ({ data }: any) => {
+  const [showTooltip, setShowTooltip] = useState(false);
   return (
     <div className="bg-white rounded-2xl p-6 h-[50vh] shadow-xl border border-slate-100 relative">
       {/* Icon Info dengan Tooltip */}
-      <div className="absolute bottom-6 right-6 group">
+       <div 
+        className="absolute bottom-6 right-6 z-50"
+        onMouseEnter={() => setShowTooltip(true)} 
+        onMouseLeave={() => setShowTooltip(false)} 
+        onClick={() => setShowTooltip(!showTooltip)}
+      >
         <Info
           size={18}
-          className="text-slate-600 hover:text-blue-500 cursor-help transition-colors"
+          className={`${showTooltip ? 'text-blue-500' : 'text-slate-600'} cursor-help transition-colors`}
         />
 
         {/* Konten Penjelasan Data */}
-        <div className="absolute right-0 bottom-full mb-3 w-72 bg-slate-900/80 backdrop-blur-md text-white p-5 rounded-2xl opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 pointer-events-none transition-all duration-300 z-50 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10">
-          {/* Header dengan Aksen Garis */}
+        <div className={`
+          absolute right-0 bottom-full mb-3 w-72 bg-slate-900/90 backdrop-blur-md text-white p-5 rounded-2xl 
+          transition-all duration-300 z-50 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10
+          ${showTooltip 
+            ? "opacity-100 translate-y-0 pointer-events-auto" 
+            : "opacity-0 translate-y-2 pointer-events-none"}
+        `}>
           <div className="flex items-center gap-2 mb-4">
             <div className="h-4 w-1 bg-blue-500 rounded-full"></div>
             <p className="font-black text-[10px] text-blue-400 uppercase tracking-[0.15em]">

@@ -78,7 +78,7 @@ return createPortal(
 
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-2 cursor-pointer bg-red-900 text-white rounded-full md:rounded-lg shadow-lg shadow-red-200 md:shadow-none hover:bg-red-700 transition-all group"
+            className="flex items-center gap-2 px-3 py-2 cursor-pointer bg-red-900 text-white rounded-full md:rounded-lg shadow-lg hover:bg-red-700 transition-all group"
           >
             <Zap size={14} className="fill-yellow-400 text-yellow-400 shrink-0" />
             <span className="text-[8px] md:text-[10px] font-black uppercase tracking-tighter md:tracking-widest whitespace-nowrap">
