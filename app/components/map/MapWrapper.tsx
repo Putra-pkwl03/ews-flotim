@@ -2,11 +2,13 @@
 
 import dynamic from 'next/dynamic';
 
+// 1. Tambahkan history ke dalam interface
 interface MapProps {
   lat: number;
   lon: number;
   magnitude: number;
   fishingPoints: any[];
+  history: any; // Tambahkan ini
 }
 
 const MapContainer = dynamic(() => import('./MapContainer'), { 
@@ -21,15 +23,17 @@ const MapContainer = dynamic(() => import('./MapContainer'), {
   )
 });
 
-export default function MapWrapper({ lat, lon, magnitude, fishingPoints }: MapProps) {
+// 2. Terima history di parameter fungsi
+export default function MapWrapper({ lat, lon, magnitude, fishingPoints, history }: MapProps) {
   return (
     <div className="w-full h-full">
-      {/* Cukup kirim datanya saja ke MapContainer */}
+      {/* 3. Teruskan history ke MapContainer */}
       <MapContainer 
         lat={lat} 
         lon={lon} 
         magnitude={magnitude} 
         titikIkan={fishingPoints} 
+        history={history} 
       />
     </div>
   );

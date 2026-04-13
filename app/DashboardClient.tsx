@@ -13,6 +13,7 @@ import { SeismicTable } from "./components/history/SeismicTable";
 export default function DashboardClient({ gempa, history, cuaca, titikIkan, coords }: any) {
   const [activeMenu, setActiveMenu] = useState('gempa');
 
+  // Logic filter titik darat dan laut
   const { dataDarat, dataLaut } = useMemo(() => {
     const allPoints = Array.isArray(titikIkan) ? titikIkan : [...(titikIkan?.darat || []), ...(titikIkan?.laut || [])];
     return {
@@ -20,6 +21,36 @@ export default function DashboardClient({ gempa, history, cuaca, titikIkan, coor
       dataLaut: allPoints.filter((p: any) => p.tipe === 'laut')
     };
   }, [titikIkan]);
+
+  // --- LOGIKA: PARSING KOORDINAT GEMPA NASIONAL ---
+  const earthquakeCoords = useMemo(() => {
+    // 1. Prioritas: Ambil dari field lintang/bujur (Data Mentah API BMKG)
+    const rawLat = gempa?.lintang || gempa?.Lintang;
+    const rawLon = gempa?.bujur || gempa?.Bujur;
+
+    if (rawLat && rawLon) {
+      // Membersihkan string "LS" atau "BT" jika ada dan convert ke float
+      return { 
+        lat: parseFloat(rawLat.replace(/[^0-9.-]/g, '')), 
+        lon: parseFloat(rawLon.replace(/[^0-9.-]/g, '')) 
+      };
+    }
+
+    // 2. Cek format PostGIS POINT(lon lat) dari Supabase
+    if (typeof gempa?.koordinat === 'string' && gempa.koordinat.includes('POINT')) {
+      const match = gempa.koordinat.match(/\((.*)\)/);
+      if (match) {
+        const [lon, lat] = match[1].split(' ');
+        return { lat: parseFloat(lat), lon: parseFloat(lon) };
+      }
+    }
+
+    // 3. Fallback: Default ke koordinat Indonesia Tengah jika data tidak ada
+    return { 
+      lat: coords?.lat || -2.5489, // Default Tengah Indonesia
+      lon: coords?.lon || 118.0149 
+    };
+  }, [gempa, coords]);
 
   const handleMenuClick = (id: string) => {
     if (id === "arsip") {
@@ -32,23 +63,18 @@ export default function DashboardClient({ gempa, history, cuaca, titikIkan, coor
     }
   };
 
-return (
+  return (
     <main className="min-h-screen bg-slate-50 flex flex-col overflow-hidden">
       <div className="fixed top-0 left-0 right-0 z-[100]">
         <Navbar activeMenu={activeMenu} setActiveMenu={handleMenuClick} />
       </div>
 
-      {/* KUNCI PERBAIKAN: 
-          1. Tambahkan 'relative' agar exit animation tidak menggeser layout.
-          2. Gunakan 'min-h-[calc(100vh-64px)]' agar tingginya tidak drop nol saat transisi.
-      */}
       <div className="pt-16 flex-grow flex flex-col relative min-h-[100vh]">
         <AnimatePresence mode="wait">
           
           {activeMenu === 'gempa' && (
             <motion.div 
               key="wrapper-monitoring"
-              // Gunakan Fade + Scale halus (0.98) agar transisi terasa lebih "dalam"
               initial={{ opacity: 0, scale: 0.99 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.01 }} 
@@ -56,31 +82,22 @@ return (
               className="w-full flex-grow flex flex-col"
             >
               <div className="relative w-full h-[80vh] overflow-hidden bg-slate-900 flex-shrink-0">
-                <MapWrapper 
-                  lat={coords.lat} 
-                  lon={coords.lon} 
-                  magnitude={parseFloat(gempa?.magnitude || "0")} 
-                  fishingPoints={dataDarat} 
-                />
+                {/* Peta sekarang fokus ke lokasi gempa terbaru dimanapun itu berada */}
+               <MapWrapper 
+  lat={earthquakeCoords.lat} 
+  lon={earthquakeCoords.lon} 
+  magnitude={parseFloat(gempa?.magnitude || "0")} 
+  fishingPoints={dataDarat}
+  history={history} // <-- Pastikan baris ini ada
+/>
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-900/40 via-transparent to-slate-50 z-10 pointer-events-none" />
               </div>
 
               <div className="max-w-7xl mx-auto px-8 relative z-20 -mt-64 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[
-                    <EarthquakeCard key="eq" data={gempa} />,
-                    <WeatherCard key="weather" data={cuaca} />,
-                    <AIChatCard key="ai" dataKonteks={{ gempa, titikDarat: dataDarat, titikLaut: dataLaut }} />
-                  ].map((card, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 + (i * 0.1), duration: 0.4 }}
-                    >
-                      {card}
-                    </motion.div>
-                  ))}
+                  <EarthquakeCard data={gempa} history={history} />
+                  <WeatherCard data={cuaca} />
+                  <AIChatCard dataKonteks={{ gempa, titikDarat: dataDarat, titikLaut: dataLaut }} />
                 </div>
 
                 <div id="arsip-section" className="pb-12 mt-12">
@@ -93,7 +110,6 @@ return (
           {activeMenu === 'ikan' && (
             <motion.div 
               key="wrapper-ikan"
-              // Hindari penggunaan 'x' yang terlalu jauh, cukup opacity dan scale
               initial={{ opacity: 0, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
