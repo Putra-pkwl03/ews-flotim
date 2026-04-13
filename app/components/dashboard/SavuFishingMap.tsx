@@ -266,7 +266,7 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
 
         {/* LEGEND PANEL */}
         <motion.div
-          className="absolute right-4 bottom-16 md:right-8 md:bottom-26 
+          className="absolute right-4 bottom-28 md:right-8 md:bottom-26 
                      bg-[#0d1117]/60 backdrop-blur-3xl px-5 py-4 md:px-7 md:py-8 
                      rounded-[2rem] md:rounded-[2.5rem] border border-white/10 shadow-2xl z-[10000] 
                      flex flex-col items-center gap-3 md:gap-6"
