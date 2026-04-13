@@ -25,9 +25,9 @@ export const EarthquakeCard = ({ data }: any) => {
           </div>
           <h2 className="text-2xl font-black text-slate-800 tracking-tight">Gempa Bumi</h2>
         </div>
-        <Badge className="bg-red-50 text-red-600 border-red-100 text-sm py-1 px-3 font-black">
-          {item.magnitude} <span className="text-[10px] ml-0.5">SR</span>
-        </Badge>
+        <Badge variant="red">
+        {item.magnitude} <span className="text-[10px] ml-0.5">SR</span>
+      </Badge>
       </div>
 
       <div className="flex gap-6 mb-6">
