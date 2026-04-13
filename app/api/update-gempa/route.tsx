@@ -134,7 +134,7 @@ export async function GET() {
       const riwayatJson = await resRiwayat.json();
       const daftarGempa = riwayatJson.Infogempa.gempa;
 
-      await Promise.all(daftarGempa.map((g) => {
+      await Promise.all(daftarGempa.map((g: any) => {
         const c = g.Coordinates.split(',');
         return supabase.from('riwayat_gempa').upsert({
           datetime_id: g.DateTime,
