@@ -119,7 +119,7 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
             className="fixed md:absolute left-4 top-38 md:left-8 md:top-auto md:bottom-26 w-[calc(100%-2rem)] md:w-[320px] h-[60vh] md:h-[82vh] 
                        bg-[#0d1117]/50 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-2xl z-[10000] pointer-events-auto overflow-hidden flex flex-col"
           >
-            <FishingDataSidebar points={points} onSelect={(p) => {
+            <FishingDataSidebar points={points} onSelect={(p: any) => {
               setMapCenter([p.lat ?? p.latitude, p.lon ?? p.longitude]);
               if(window.innerWidth < 768) setActivePanel(null);
             }} />
