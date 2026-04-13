@@ -21,13 +21,10 @@ export default function FishingDataSidebar({ points = [], onSelect }: { points: 
       <div className="flex-1 overflow-y-auto p-4 pr-2 space-y-3 custom-scrollbar ">
         {points && points.map((p, index) => (
           <div 
-            /* PERBAIKAN: Gunakan kombinasi ID dan Nama atau Index 
-               untuk memastikan key benar-benar unik jika data ID duplikat.
-            */
-            key={`sidebar-item-${p.id}-${index}`} 
-            onClick={() => onSelect(p)}
-            className="group bg-white/5 hover:bg-white/10 border border-white/5 hover:border-blue-500/50 p-4 rounded-2xl transition-all cursor-pointer"
-          >
+          key={`item-${index}-${p.id || 'no-id'}`} 
+    onClick={() => onSelect(p)}
+    className="group bg-white/5 hover:bg-white/10 border border-white/5 hover:border-blue-500/50 p-4 rounded-2xl transition-all cursor-pointer"
+  >
             <div className="flex justify-between items-start mb-2">
               <span className="text-[11px] text-white font-bold uppercase tracking-tight">
                 {p.nama || 'Unnamed Node'}

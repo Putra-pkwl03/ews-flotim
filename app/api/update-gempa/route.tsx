@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { supabase } from '../../../lib/supabaseClient';
 import { getSeaTemperature, analyzeFishingPotency } from '../../../lib/fishingService';
 
@@ -156,6 +157,8 @@ export async function GET() {
       .select('*')
       .order('datetime_id', { ascending: false })
       .limit(20);
+      
+revalidatePath('/');
 
     return NextResponse.json({
       success: true,

@@ -22,7 +22,7 @@ export const Navbar = ({ activeMenu, setActiveMenu }: { activeMenu: string, setA
 
   const menuItems = [
     { name: "Pemantauan", id: "gempa", icon: Map },
-    { name: "Radar Ikan", id: "ikan", icon: Fish },
+    { name: "Zona Ikan", id: "ikan", icon: Fish },
     { name: "Arsip", id: "arsip", icon: Database }
   ];
 

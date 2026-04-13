@@ -126,7 +126,6 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
 
             const analisis = analyzeFishingPotency(p.suhu);
 
-            // Safe JSON Parse Prediksi
             let dataPrediksi = {
               jam: "",
               bahaya: "Aman",
@@ -155,13 +154,12 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
 
             return (
               <Marker
-                key={`marker-${p.id_titik ?? p.id ?? index}`}
+                key={`marker-${index}-${p.id_titik || p.id || 'point'}`}
                 position={[lat, lon]}
                 icon={createRadarIcon(getStatusColor(analisis.status))}
               >
                 <Popup className="custom-weather-popup">
                   <div className="w-[260px] overflow-hidden rounded-2xl bg-[#0d1117]/60 backdrop-blur-xl border border-white/10 shadow-2xl text-white">
-                    {/* Header */}
                     <div className="bg-gradient-to-r from-blue-600/20 to-emerald-600/20 px-4 py-3 border-b border-white/10">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2 max-w-[60%]">
@@ -189,7 +187,6 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
                       </span>
                     </div>
 
-                    {/* Body */}
                     <div className="p-4 space-y-2.5">
                       <PopupStat
                         icon={
@@ -231,10 +228,11 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
       </div>
 
       {/* 2. RESPONSIVE PANELS */}
-      <AnimatePresence>
+      <AnimatePresence mode="popLayout">
         {/* SIDEBAR PANEL */}
         {(activePanel === "list" || (mounted && window.innerWidth >= 768)) && (
           <motion.div
+            key="sidebar-panel-motion"
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
@@ -251,14 +249,21 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
           </motion.div>
         )}
 
-        {/* WEATHER PANEL */}
-        {(activePanel === "weather" ||
-          (mounted && window.innerWidth >= 768)) && (
+        {/* WEATHER PANEL - AnimatePresence ganda dihapus, diganti key unik */}
+        {(activePanel === "weather" || (mounted && window.innerWidth >= 1024)) && (
           <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -20, opacity: 0 }}
-            className="fixed md:absolute right-4 top-38 md:right-8 md:top-[370px] w-[calc(100%-2rem)] md:w-[310px] z-[10000]"
+            key="weather-panel-motion"
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ 
+              opacity: 1, 
+              y: activePanel === "weather" 
+                ? (window.innerWidth >= 768 ? -220 : 0) 
+                : 0 
+            }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className={`fixed z-[10001] w-[calc(100%-2rem)] md:w-[300px] right-4 md:right-8 
+              ${window.innerWidth >= 768 ? 'bottom-[240px]' : 'top-38'}`}
           >
             <SeaWeatherHeader points={points} />
           </motion.div>
@@ -266,6 +271,7 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
 
         {/* LEGEND PANEL */}
         <motion.div
+          key="legend-panel-motion"
           className="absolute right-4 bottom-38 md:right-8 md:bottom-26 
                      bg-[#0d1117]/60 backdrop-blur-3xl px-5 py-4 md:px-7 md:py-8 
                      rounded-[2rem] md:rounded-[2.5rem] border border-white/10 shadow-2xl z-[10000] 
@@ -285,21 +291,15 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
               icon={<Activity size={16} />}
               color="amber"
               label="Sedang"
-              count={
-                points.filter((p) => p.potensi === "Potensi Sedang").length
-              }
+              count={points.filter((p) => p.potensi === "Potensi Sedang").length}
             />
             <LegendItem
               icon={<Waves size={16} />}
               color="slate"
               label="Rendah"
-              count={
-                points.filter(
-                  (p) =>
-                    p.potensi !== "Sangat Tinggi" &&
-                    p.potensi !== "Potensi Sedang",
-                ).length
-              }
+              count={points.filter((p) => 
+                p.potensi !== "Sangat Tinggi" && p.potensi !== "Potensi Sedang"
+              ).length}
             />
           </div>
         </motion.div>
@@ -308,7 +308,7 @@ export default function SavuFishingMap({ points = [] }: { points: any[] }) {
   );
 }
 
-// --- Helper Components ---
+// --- Helper Components Tetap Sama ---
 
 function PopupStat({ icon, label, value, color, isUpper = false }: any) {
   return (
@@ -319,9 +319,7 @@ function PopupStat({ icon, label, value, color, isUpper = false }: any) {
           {label}
         </span>
       </div>
-      <span
-        className={`font-mono font-bold text-[11px] ${color} ${isUpper ? "uppercase" : ""}`}
-      >
+      <span className={`font-mono font-bold text-[11px] ${color} ${isUpper ? "uppercase" : ""}`}>
         {value}
       </span>
     </div>
@@ -336,31 +334,17 @@ function LegendItem({ icon, color, label, count }: any) {
   };
   return (
     <div className="flex flex-col items-center gap-1.5 md:gap-3">
-      <div
-        className={`w-9 h-9 md:w-12 md:h-12 rounded-full border flex items-center justify-center ${colors[color]}`}
-      >
+      <div className={`w-9 h-9 md:w-12 md:h-12 rounded-full border flex items-center justify-center ${colors[color]}`}>
         {icon}
       </div>
-      <span
-        className={`${colors[color].split(" ")[2]} text-[7px] md:text-[10px] font-black uppercase tracking-tighter`}
-      >
+      <span className={`${colors[color].split(" ")[2]} text-[7px] md:text-[10px] font-black uppercase tracking-tighter`}>
         {label} ({count})
       </span>
     </div>
   );
 }
 
-function NavButton({
-  active,
-  onClick,
-  icon,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: any;
-  label: string;
-}) {
+function NavButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: any; label: string; }) {
   return (
     <button
       onClick={onClick}
