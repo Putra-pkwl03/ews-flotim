@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import MapWrapper from "./components/map/MapWrapper";
 import FishingWrapper from "./components/map/FishingWrapper";
 import { Navbar } from "./components/layout/Navbar";
@@ -10,15 +10,23 @@ import { WeatherCard } from "./components/dashboard/WeatherCard";
 import { AIChatCard } from "./components/dashboard/AIChatCard";
 import { SeismicTable } from "./components/history/SeismicTable";
 
-export default function DashboardClient({ gempa, history, cuaca, titikIkan, coords }: any) {
-  const [activeMenu, setActiveMenu] = useState('gempa');
+export default function DashboardClient({
+  gempa,
+  history,
+  cuaca,
+  titikIkan,
+  coords,
+}: any) {
+  const [activeMenu, setActiveMenu] = useState("gempa");
 
   // Logic filter titik darat dan laut
   const { dataDarat, dataLaut } = useMemo(() => {
-    const allPoints = Array.isArray(titikIkan) ? titikIkan : [...(titikIkan?.darat || []), ...(titikIkan?.laut || [])];
+    const allPoints = Array.isArray(titikIkan)
+      ? titikIkan
+      : [...(titikIkan?.darat || []), ...(titikIkan?.laut || [])];
     return {
-      dataDarat: allPoints.filter((p: any) => p.tipe === 'darat'),
-      dataLaut: allPoints.filter((p: any) => p.tipe === 'laut')
+      dataDarat: allPoints.filter((p: any) => p.tipe === "darat"),
+      dataLaut: allPoints.filter((p: any) => p.tipe === "laut"),
     };
   }, [titikIkan]);
 
@@ -30,25 +38,28 @@ export default function DashboardClient({ gempa, history, cuaca, titikIkan, coor
 
     if (rawLat && rawLon) {
       // Membersihkan string "LS" atau "BT" jika ada dan convert ke float
-      return { 
-        lat: parseFloat(rawLat.replace(/[^0-9.-]/g, '')), 
-        lon: parseFloat(rawLon.replace(/[^0-9.-]/g, '')) 
+      return {
+        lat: parseFloat(rawLat.replace(/[^0-9.-]/g, "")),
+        lon: parseFloat(rawLon.replace(/[^0-9.-]/g, "")),
       };
     }
 
     // 2. Cek format PostGIS POINT(lon lat) dari Supabase
-    if (typeof gempa?.koordinat === 'string' && gempa.koordinat.includes('POINT')) {
+    if (
+      typeof gempa?.koordinat === "string" &&
+      gempa.koordinat.includes("POINT")
+    ) {
       const match = gempa.koordinat.match(/\((.*)\)/);
       if (match) {
-        const [lon, lat] = match[1].split(' ');
+        const [lon, lat] = match[1].split(" ");
         return { lat: parseFloat(lat), lon: parseFloat(lon) };
       }
     }
 
     // 3. Fallback: Default ke koordinat Indonesia Tengah jika data tidak ada
-    return { 
+    return {
       lat: coords?.lat || -2.5489, // Default Tengah Indonesia
-      lon: coords?.lon || 118.0149 
+      lon: coords?.lon || 118.0149,
     };
   }, [gempa, coords]);
 
@@ -56,7 +67,9 @@ export default function DashboardClient({ gempa, history, cuaca, titikIkan, coor
     if (id === "arsip") {
       setActiveMenu("gempa");
       setTimeout(() => {
-        document.getElementById("arsip-section")?.scrollIntoView({ behavior: "smooth" });
+        document
+          .getElementById("arsip-section")
+          ?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } else {
       setActiveMenu(id);
@@ -71,56 +84,107 @@ export default function DashboardClient({ gempa, history, cuaca, titikIkan, coor
 
       <div className="pt-16 flex-grow flex flex-col relative min-h-[100vh]">
         <AnimatePresence mode="wait">
-          
-          {activeMenu === 'gempa' && (
-            <motion.div 
+          {activeMenu === "gempa" && (
+            <motion.div
               key="wrapper-monitoring"
               initial={{ opacity: 0, scale: 0.99 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.01 }} 
+              exit={{ opacity: 0, scale: 1.01 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="w-full flex-grow flex flex-col"
             >
               <div className="relative w-full h-[80vh] overflow-hidden bg-slate-900 flex-shrink-0">
-                {/* Peta sekarang fokus ke lokasi gempa terbaru dimanapun itu berada */}
-               <MapWrapper 
-  lat={earthquakeCoords.lat} 
-  lon={earthquakeCoords.lon} 
-  magnitude={parseFloat(gempa?.magnitude || "0")} 
-  fishingPoints={dataDarat}
-  history={history} // <-- Pastikan baris ini ada
-/>
+                <MapWrapper
+                  lat={earthquakeCoords.lat}
+                  lon={earthquakeCoords.lon}
+                  magnitude={parseFloat(gempa?.magnitude || "0")}
+                  fishingPoints={dataDarat}
+                  history={history}
+                />
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-900/40 via-transparent to-slate-50 z-10 pointer-events-none" />
               </div>
 
-              <div className="max-w-7xl mx-auto px-8 relative z-20 -mt-64 w-full">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <EarthquakeCard data={gempa} history={history} />
-                  <WeatherCard data={cuaca} />
-                  <AIChatCard dataKonteks={{ gempa, titikDarat: dataDarat, titikLaut: dataLaut }} />
-                </div>
+              <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-20 -mt-64 w-full">
+  {/* Container Grid dengan Animasi Stagger */}
+  <motion.div 
+    className="grid grid-cols-1 md:grid-cols-3 gap-6"
+    initial="hidden"
+    animate="show"
+    variants={{
+      hidden: { opacity: 0 },
+      show: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.2 // Jeda antar card saat muncul
+        }
+      }
+    }}
+  >
+    {/* Earthquake Card */}
+    <motion.div 
+      variants={{ 
+        hidden: { y: 20, opacity: 0 }, 
+        show: { y: 0, opacity: 1, transition: { duration: 0.5 } } 
+      }}
+    >
+      <EarthquakeCard data={gempa} history={history} />
+    </motion.div>
 
-                <div id="arsip-section" className="pb-12 mt-12">
-                  <SeismicTable history={history} />
-                </div>
-              </div>
+    {/* Weather Card */}
+    <motion.div 
+      variants={{ 
+        hidden: { y: 20, opacity: 0 }, 
+        show: { y: 0, opacity: 1, transition: { duration: 0.5 } } 
+      }}
+    >
+      <WeatherCard data={cuaca} />
+    </motion.div>
+
+    {/* AI Chat Card */}
+    <motion.div 
+      variants={{ 
+        hidden: { y: 20, opacity: 0 }, 
+        show: { y: 0, opacity: 1, transition: { duration: 0.5 } } 
+      }}
+    >
+      <AIChatCard
+        dataKonteks={{
+          gempa,
+          titikDarat: dataDarat,
+          titikLaut: dataLaut,
+        }}
+      />
+    </motion.div>
+  </motion.div>
+
+  {/* Table Section dengan animasi While In View */}
+  <motion.div 
+    id="arsip-section" 
+    className="pb-12 mt-12"
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay: 0.4, duration: 0.6 }}
+  >
+    <SeismicTable history={history} />
+  </motion.div>
+</div>
             </motion.div>
           )}
 
-          {activeMenu === 'ikan' && (
-            <motion.div 
+          {activeMenu === "ikan" && (
+            <motion.div
               key="wrapper-ikan"
               initial={{ opacity: 0, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="relative w-full h-[calc(100vh-64px)] bg-slate-950 overflow-hidden" 
+              className="relative w-full h-[calc(100vh-64px)] bg-slate-950 overflow-hidden"
             >
               <FishingWrapper points={dataLaut} />
               <div className="absolute inset-0 bg-gradient-to-b from-slate-950/20 via-transparent to-slate-50 z-10 pointer-events-none" />
             </motion.div>
           )}
-
         </AnimatePresence>
       </div>
     </main>
