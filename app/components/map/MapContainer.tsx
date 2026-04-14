@@ -216,7 +216,7 @@ export default function MapContainer({
           ></span>
           {/* Teks lebih pendek di mobile */}
           <span className="sm:inline hidden">
-            {showHistory ? "Tutup Riwayat" : "Buka Riwayat & Gulir"}
+            {showHistory ? "Tutup Riwayat" : "Buka Riwayat"}
           </span>
           <span className="sm:hidden inline">
             {showHistory ? "Tutup" : "Riwayat"}
